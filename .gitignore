@@ -24,3 +24,6 @@ __pycache__/
 venv/
 env/
 .env
+
+# MLflow local tracking
+mlruns/
