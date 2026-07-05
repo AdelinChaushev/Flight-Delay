@@ -55,3 +55,22 @@ def make_lgbm_l1_objective(X_fit, y_fit, X_val, y_val_cap, y_val_true):
         return mean_absolute_error(y_val_true, model.predict(X_val))
 
     return objective
+
+
+def load_run_model(experiment, run_name, flavor="lightgbm"):
+    """Load the most-recent MLflow run named ``run_name`` from ``experiment``.
+
+    Looks up the run id via :func:`mlflow.search_runs` and loads the model logged
+    under ``runs:/<id>/model`` in the requested native ``flavor`` — ``"lightgbm"``
+    or ``"sklearn"``. Native flavors preserve exact predict behaviour (e.g. a tree
+    model's ``best_iteration``). Used for the one-shot final test evaluation.
+    """
+    import mlflow
+    runs = mlflow.search_runs(experiment_names=[experiment], order_by=["start_time DESC"])
+    run_id = runs.loc[runs["tags.mlflow.runName"] == run_name, "run_id"].iloc[0]
+    uri = f"runs:/{run_id}/model"
+    if flavor == "sklearn":
+        import mlflow.sklearn
+        return mlflow.sklearn.load_model(uri)
+    import mlflow.lightgbm
+    return mlflow.lightgbm.load_model(uri)

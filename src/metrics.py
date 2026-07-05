@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from sklearn.metrics import mean_absolute_error, r2_score
 
-try:  # scikit-learn >= 1.4 exposes RMSE directly
+try:  
     from sklearn.metrics import root_mean_squared_error as rmse
 except ImportError:  # fall back for older versions
     from sklearn.metrics import mean_squared_error
