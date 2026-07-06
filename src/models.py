@@ -74,3 +74,16 @@ def load_run_model(experiment, run_name, flavor="lightgbm"):
         return mlflow.sklearn.load_model(uri)
     import mlflow.lightgbm
     return mlflow.lightgbm.load_model(uri)
+
+
+def as_categoricals(df, cat_cols):
+    """Return a copy of ``df`` with ``cat_cols`` cast to the pandas ``category``
+    dtype (which LightGBM auto-detects as categorical features).
+
+    Collapses the repeated "copy the feature frame, then cast each categorical
+    column" step used to build the tree feature matrices into one tested call.
+    """
+    out = df.copy()
+    for col in cat_cols:
+        out[col] = out[col].astype("category")
+    return out

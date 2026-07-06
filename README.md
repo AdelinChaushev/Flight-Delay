@@ -14,10 +14,12 @@ Flight-Delay/
 │   └── Conclusion.ipynb           # results & findings (read last)
 ├── src/
 │   ├── metrics.py                 # MAE / RMSE / R² helpers
-│   └── models.py                  # preprocessing, pipeline, and the LightGBM tuning objective
+│   └── models.py                  # preprocessing, pipelines, tuning objective, model loader
+├── tests/                         # pytest unit tests for src/
 ├── data/                          # git-ignored
 │   ├── raw/                       # put the downloaded CSV here
 │   └── processed/                 # parquet artifacts written by the notebooks
+├── requirements.txt
 └── README.md
 ```
 
@@ -30,22 +32,32 @@ The dataset is git-ignored (too large for the repo). Download it from Kaggle and
 - **Source:** [Flight Data 2024 — Kaggle](https://www.kaggle.com/datasets/hrishitpatil/flight-data-2024)
 - **Expected path:** `data/raw/flight_data_2024.csv`
 
-## Setup
-
-Python 3.10+. Install the dependencies:
-
-```bash
-pip install pandas numpy "scikit-learn>=1.4" scipy feature-engine lightgbm optuna mlflow matplotlib pyarrow
-```
-
 ## Running
 
-Run the notebooks **in order, top to bottom**. Each of the middle three writes a file the next one reads:
+From the project root:
 
-1. `Introduction.ipynb` — read (no code to run)
-2. `Eda.ipynb` — writes `data/processed/flights_clean.parquet`
-3. `Feature_Engineering.ipynb` — writes `data/processed/flights_features.parquet`
-4. `Modeling.ipynb` — trains, tunes with Optuna, tracks with MLflow, scores the held-out test set
-5. `Conclusion.ipynb` — read (no code to run)
+**1. Install** — Python 3.10+:
 
-> **Note:** run `Modeling.ipynb` start-to-finish in a single session — its training cells log models to MLflow that the final test cell loads back. The local `mlruns/` store is git-ignored and is regenerated on each run.
+```bash
+pip install -r requirements.txt
+```
+
+**2. Get the data** — download from Kaggle (see *Getting the data* above) to `data/raw/flight_data_2024.csv`.
+
+**3. Run the notebooks in order, top to bottom** — the middle three each write a parquet the next one reads:
+
+| # | notebook | produces / does |
+|---|---|---|
+| 1 | `Introduction.ipynb` | overview & plan — *read* |
+| 2 | `Eda.ipynb` | → `data/processed/flights_clean.parquet` |
+| 3 | `Feature_Engineering.ipynb` | → `data/processed/flights_features.parquet` |
+| 4 | `Modeling.ipynb` | baselines → linear → LightGBM (Optuna, MLflow), then the held-out test |
+| 5 | `Conclusion.ipynb` | results & findings — *read* |
+
+**4. Run the tests** (optional):
+
+```bash
+pytest
+```
+
+> Run `Modeling.ipynb` **start-to-finish in one session**: its training cells log models to a local `mlruns/` store that the final cells load back (git-ignored, regenerated on each run).
